@@ -1,0 +1,25 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/account_dev_db
+    username: dev_user
+    password: dev_password_123
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+
+logging:
+  level:
+    com.example.sandbox: DEBUG
+    org.hibernate.SQL: DEBUG
+
+hello:
+  myname: Hey Yo
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*" # Expose all health and metrics endpoints for easy debugging
+  tracing:
+    sampling:
+      probability: 1.0 # sample 100% of requests in local/dev

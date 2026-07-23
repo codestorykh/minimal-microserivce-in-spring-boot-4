@@ -1,0 +1,21 @@
+server:
+  port: 8888
+spring:
+  application:
+    name: config-server
+  profiles:
+    active: native
+  cloud:
+    config:
+      server:
+        native:
+          # Point strictly to the parent directory where your config files sit
+          search-locations: classpath:/config/
+          version: 1.0.0
+          default-label: master
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
