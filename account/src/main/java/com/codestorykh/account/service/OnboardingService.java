@@ -8,4 +8,5 @@ public interface OnboardingService {
     AccountOnboardingResponse onboardCustomerWithAccount(AccountOnboardingRequest accountOnboardingRequest);
 
     AccountOnboardingResponse fetchByAccountNumber(String accountNumber);
+
 }

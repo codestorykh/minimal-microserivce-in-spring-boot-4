@@ -13,7 +13,8 @@
 	<modules>
 		<module>config-server</module>
 		<module>account</module>
-	</modules>
+        <module>api-response</module>
+    </modules>
 
 	<groupId>com.codestorykh</groupId>
 	<artifactId>minimal-microserivce-in-spring-boot-4</artifactId>

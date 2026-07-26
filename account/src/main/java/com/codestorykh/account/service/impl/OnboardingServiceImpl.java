@@ -7,6 +7,8 @@ import com.codestorykh.account.dto.response.AccountOnboardingResponse;
 import com.codestorykh.account.mapper.OnboardingMapper;
 import com.codestorykh.account.repository.AccountRepository;
 import com.codestorykh.account.repository.CustomerRepository;
+import com.codestorykh.account.service.AccountOpeningService;
+import com.codestorykh.account.service.KycOnboardingService;
 import com.codestorykh.account.service.OnboardingService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,41 +23,26 @@ import java.util.Optional;
 public class OnboardingServiceImpl implements OnboardingService {
 
     private final OnboardingMapper onboardingMapper;
-    private final CustomerRepository customerRepository;
     private final AccountRepository accountRepository;
+    private final CustomerRepository customerRepository;
+    private final KycOnboardingService kycOnboardingService;
+    private final AccountOpeningService accountOpeningService;
+
 
     @Transactional
     @Override
     public AccountOnboardingResponse onboardCustomerWithAccount(AccountOnboardingRequest accountOnboardingRequest) {
-        // 1. Create Customer Master Record
 
-        Customer customer = onboardingMapper.toCustomerEntity(accountOnboardingRequest);
-        customer.setCustomerNumber(generateCustomerNumber());
-        Customer savedCustomer = customerRepository.save(customer);
+        Customer customer = kycOnboardingService.resolveOrCreateCustomer(accountOnboardingRequest);
 
-        // 2. Open Primary CASA Account
-        Account account = onboardingMapper.toAccountEntity(accountOnboardingRequest);
-        account.setCustomer(savedCustomer);
-        account.setAccountNumber(generateAccountNumber());
-
-         accountRepository.save(account);
-
-         return onboardingMapper.toAccountResponse(account);
+        Account account = accountOpeningService.createAccount(customer, accountOnboardingRequest);
+        return onboardingMapper.toAccountResponse(account);
     }
 
     @Override
     public AccountOnboardingResponse fetchByAccountNumber(String accountNumber) {
         Optional<Account> account = accountRepository.findAccountByAccountNumber(accountNumber);
         return account.map(onboardingMapper::toAccountResponse).orElse(null);
-    }
-
-    private String generateCustomerNumber() {
-        // Simple customer number generator logic
-        return "100" + (long) (Math.random() * 1000000000L);
-    }
-    private String generateAccountNumber() {
-        // Simple account number generator logic
-        return "100" + (long) (Math.random() * 1000000000L);
     }
 
 }
