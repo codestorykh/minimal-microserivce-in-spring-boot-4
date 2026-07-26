@@ -12,6 +12,7 @@
 
 	<modules>
 		<module>config-server</module>
+		<module>account</module>
 	</modules>
 
 	<groupId>com.codestorykh</groupId>

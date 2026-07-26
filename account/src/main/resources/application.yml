@@ -1,0 +1,19 @@
+server:
+  port: 8081
+spring:
+  jackson:
+    property-naming-strategy: SNAKE_CASE
+  application:
+    name: account
+  profiles:
+    active: dev
+
+  config:
+    import: "optional:configserver:"
+  cloud:
+    config:
+      uri: http://localhost:8888
+      fail-fast: true
+      retry:
+        max-attempts: 6
+        initial-interval: 1000
