@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="https://www.omg.org/spec/DMN/20191111/MODEL/"
+             xmlns:dmndi="https://www.omg.org/spec/DMN/20191111/DMNDI/"
+             xmlns:dc="http://www.omg.org/spec/DMN/20180521/DC/"
+             id="Definitions_USD_KHR"
+             name="USD KHR Calculation Engine"
+             namespace="http://camunda.org/schema/1.0/dmn">
+
+  <!-- ========================================================= -->
+  <!-- DECISION 1: FX RATE & TARGET CALCULATION (Hit Policy: FIRST) -->
+  <!-- ========================================================= -->
+  <decision id="fx_calculator" name="FX Rate Calculator">
+    <decisionTable id="DecisionTable_FX" hitPolicy="FIRST">
+
+      <!-- INPUT CLAUSES -->
+      <input id="Input_SourceCcy" label="Source Currency">
+        <inputExpression id="Expr_SourceCcy" typeRef="string">
+          <text>source_currency</text>
+        </inputExpression>
+      </input>
+      <input id="Input_TargetCcy" label="Target Currency">
+        <inputExpression id="Expr_TargetCcy" typeRef="string">
+          <text>target_currency</text>
+        </inputExpression>
+      </input>
+      <input id="Input_CustomerTier" label="Customer Tier">
+        <inputExpression id="Expr_CustomerTier" typeRef="string">
+          <text>customer_tier</text>
+        </inputExpression>
+      </input>
+      <input id="Input_SourceAmt" label="Source Amount USD">
+        <inputExpression id="Expr_SourceAmt" typeRef="number">
+          <text>source_amount_usd</text>
+        </inputExpression>
+      </input>
+
+      <!-- OUTPUT CLAUSES -->
+      <output id="Output_FxRate" label="Applied FX Rate" name="applied_fx_rate" typeRef="number" />
+      <output id="Output_TargetAmt" label="Target Amount KHR" name="target_amount_khr" typeRef="number" />
+      <output id="Output_Status" label="Conversion Status" name="conversion_status" typeRef="string" />
+
+      <!-- RULE 1: VIP Preferential Rate (4060 KHR) -->
+      <rule id="Rule_FX_VIP">
+        <inputEntry id="IE_FX_1_1"><text>"USD"</text></inputEntry>
+        <inputEntry id="IE_FX_1_2"><text>"KHR"</text></inputEntry>
+        <inputEntry id="IE_FX_1_3"><text>"VIP"</text></inputEntry>
+        <inputEntry id="IE_FX_1_4"><text>> 0</text></inputEntry>
+        <outputEntry id="OE_FX_1_1"><text>4060.00</text></outputEntry>
+        <outputEntry id="OE_FX_1_2"><text>source_amount_usd * 4060.00</text></outputEntry>
+        <outputEntry id="OE_FX_1_3"><text>"SUCCESS"</text></outputEntry>
+      </rule>
+
+      <!-- RULE 2: RETAIL Standard Rate <= $1,000 USD (4040 KHR) -->
+      <rule id="Rule_FX_Retail_Small">
+        <inputEntry id="IE_FX_2_1"><text>"USD"</text></inputEntry>
+        <inputEntry id="IE_FX_2_2"><text>"KHR"</text></inputEntry>
+        <inputEntry id="IE_FX_2_3"><text>"RETAIL"</text></inputEntry>
+        <inputEntry id="IE_FX_2_4"><text>&lt;= 1000</text></inputEntry>
+        <outputEntry id="OE_FX_2_1"><text>4040.00</text></outputEntry>
+        <outputEntry id="OE_FX_2_2"><text>source_amount_usd * 4040.00</text></outputEntry>
+        <outputEntry id="OE_FX_2_3"><text>"SUCCESS"</text></outputEntry>
+      </rule>
+
+      <!-- RULE 3: RETAIL Standard Rate > $1,000 USD Volume Discount (4050 KHR) -->
+      <rule id="Rule_FX_Retail_Large">
+        <inputEntry id="IE_FX_3_1"><text>"USD"</text></inputEntry>
+        <inputEntry id="IE_FX_3_2"><text>"KHR"</text></inputEntry>
+        <inputEntry id="IE_FX_3_3"><text>"RETAIL"</text></inputEntry>
+        <inputEntry id="IE_FX_3_4"><text>> 1000</text></inputEntry>
+        <outputEntry id="OE_FX_3_1"><text>4050.00</text></outputEntry>
+        <outputEntry id="OE_FX_3_2"><text>source_amount_usd * 4050.00</text></outputEntry>
+        <outputEntry id="OE_FX_3_3"><text>"SUCCESS"</text></outputEntry>
+      </rule>
+
+      <!-- RULE 4: Fallback Guardrail for Unsupported Currency Pair -->
+      <rule id="Rule_FX_Fallback">
+        <inputEntry id="IE_FX_4_1"><text>-</text></inputEntry>
+        <inputEntry id="IE_FX_4_2"><text>-</text></inputEntry>
+        <inputEntry id="IE_FX_4_3"><text>-</text></inputEntry>
+        <inputEntry id="IE_FX_4_4"><text>-</text></inputEntry>
+        <outputEntry id="OE_FX_4_1"><text>0.00</text></outputEntry>
+        <outputEntry id="OE_FX_4_2"><text>0.00</text></outputEntry>
+        <outputEntry id="OE_FX_4_3"><text>"UNSUPPORTED_PAIR"</text></outputEntry>
+      </rule>
+
+    </decisionTable>
+  </decision>
+
+  <!-- ========================================================= -->
+  <!-- DECISION 2: MULTI-BASIS FEE ENGINE (Hit Policy: COLLECT)    -->
+  <!-- ========================================================= -->
+  <decision id="fee_calculator" name="Fee Calculator">
+    <decisionTable id="DecisionTable_Fees" hitPolicy="COLLECT">
+
+      <!-- INPUT CLAUSES -->
+      <input id="Input_ServiceType" label="Service Type">
+        <inputExpression id="Expr_ServiceType" typeRef="string">
+          <text>service_type</text>
+        </inputExpression>
+      </input>
+      <input id="Input_FeeSourceAmt" label="Source Amount USD">
+        <inputExpression id="Expr_FeeSourceAmt" typeRef="number">
+          <text>source_amount_usd</text>
+        </inputExpression>
+      </input>
+      <input id="Input_FeeTargetAmt" label="Target Amount KHR">
+        <inputExpression id="Expr_FeeTargetAmt" typeRef="number">
+          <text>target_amount_khr</text>
+        </inputExpression>
+      </input>
+
+      <!-- OUTPUT CLAUSES -->
+      <output id="Output_FeeCode" label="Fee Code" name="fee_code" typeRef="string" />
+      <output id="Output_Basis" label="Currency Basis" name="currency_basis" typeRef="string" />
+      <output id="Output_FeeAmt" label="Fee Amount" name="fee_amount" typeRef="number" />
+      <output id="Output_FeeCcy" label="Fee Currency" name="fee_currency" typeRef="string" />
+
+      <!-- FEE RULE 1: USD Source Basis - Bank Processing Fee ($1.00 USD) -->
+      <rule id="Rule_Fee_USD_Service">
+        <inputEntry id="IE_Fee_1_1"><text>"REMITTANCE"</text></inputEntry>
+        <inputEntry id="IE_Fee_1_2"><text>> 0</text></inputEntry>
+        <inputEntry id="IE_Fee_1_3"><text>-</text></inputEntry>
+        <outputEntry id="OE_Fee_1_1"><text>"SERVICE_FEE_USD"</text></outputEntry>
+        <outputEntry id="OE_Fee_1_2"><text>"SOURCE"</text></outputEntry>
+        <outputEntry id="OE_Fee_1_3"><text>1.00</text></outputEntry>
+        <outputEntry id="OE_Fee_1_4"><text>"USD"</text></outputEntry>
+      </rule>
+
+      <!-- FEE RULE 2: KHR Target Basis - Local Clearing Flat Fee (1,000 KHR) for <= 4,000,000 KHR -->
+      <rule id="Rule_Fee_KHR_Small">
+        <inputEntry id="IE_Fee_2_1"><text>"REMITTANCE"</text></inputEntry>
+        <inputEntry id="IE_Fee_2_2"><text>-</text></inputEntry>
+        <inputEntry id="IE_Fee_2_3"><text>&lt;= 4000000</text></inputEntry>
+        <outputEntry id="OE_Fee_2_1"><text>"CLEARING_FEE_KHR"</text></outputEntry>
+        <outputEntry id="OE_Fee_2_2"><text>"TARGET"</text></outputEntry>
+        <outputEntry id="OE_Fee_2_3"><text>1000.00</text></outputEntry>
+        <outputEntry id="OE_Fee_2_4"><text>"KHR"</text></outputEntry>
+      </rule>
+
+      <!-- FEE RULE 3: KHR Target Basis - Local Clearing Tiered Fee (0.05%) for > 4,000,000 KHR -->
+      <rule id="Rule_Fee_KHR_Large">
+        <inputEntry id="IE_Fee_3_1"><text>"REMITTANCE"</text></inputEntry>
+        <inputEntry id="IE_Fee_3_2"><text>-</text></inputEntry>
+        <inputEntry id="IE_Fee_3_3"><text>> 4000000</text></inputEntry>
+        <outputEntry id="OE_Fee_3_1"><text>"CLEARING_FEE_KHR"</text></outputEntry>
+        <outputEntry id="OE_Fee_3_2"><text>"TARGET"</text></outputEntry>
+        <outputEntry id="OE_Fee_3_3"><text>target_amount_khr * 0.0005</text></outputEntry>
+        <outputEntry id="OE_Fee_3_4"><text>"KHR"</text></outputEntry>
+      </rule>
+
+    </decisionTable>
+  </decision>
+
+</definitions>
