@@ -43,4 +43,13 @@ public class AccountOnboardingResponse {
 
     @Schema(description = "Current account status", example = "ACTIVE")
     private String status;
+
+    @Schema(description = "AML risk level from onboarding inspection", example = "LOW")
+    private String amlRiskLevel;
+
+    @Schema(description = "AML decision from onboarding inspection", example = "ALLOW")
+    private String amlDecision;
+
+    @Schema(description = "AML inspection summary")
+    private String amlSummary;
 }
