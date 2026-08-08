@@ -23,6 +23,8 @@ public class GlobalExceptionHandler {
     // 🎯 1. SPECIFIC MATCH: Explicit Business Logic Failures
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<ApiResponse<Void>> handleBusinessException(BusinessException ex, HttpServletRequest request) {
+        OpenTelemetryUtils.recordHttpFailure(ex, ex.getStatus().value(), ex.getErrorCode());
+
         ErrorDetail errorDetail = buildErrorDetail(request, ex.getCustomValidations());
         ApiResponse<Void> response = ApiResponse
                 .failure(
@@ -36,6 +38,8 @@ public class GlobalExceptionHandler {
     // 🎯 2. SPECIFIC MATCH: Automated DTO Payload Validations (@Valid)
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ApiResponse<Void>> handleValidationException(MethodArgumentNotValidException ex, HttpServletRequest request) {
+        OpenTelemetryUtils.recordHttpFailure(ex, HttpStatus.BAD_REQUEST.value(), "VALIDATION_FAILED");
+
         Map<String, String> validations = new HashMap<>();
         ex.getBindingResult().getFieldErrors().forEach(error ->
                 validations.put(error.getField(), error.getDefaultMessage())
@@ -89,6 +93,8 @@ public class GlobalExceptionHandler {
             }
         }
 
+        OpenTelemetryUtils.recordHttpFailure(ex, status.value(), errorCode);
+
         ErrorDetail errorDetail = buildErrorDetail(request, validations);
         ApiResponse<Void> response = ApiResponse
                 .failure(
@@ -103,8 +109,7 @@ public class GlobalExceptionHandler {
     // Any unexpected system error (NullPointerException, array mismatches, etc.) ends up here.
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<Void>> handleGenericException(Exception ex, HttpServletRequest request) {
-        // Critical: Log the raw underlying exception details internally so developers can read the stack trace
-        // Logger.error("Unhandled system failure caught at gateway network boundary", ex);
+        OpenTelemetryUtils.recordHttpFailure(ex, HttpStatus.INTERNAL_SERVER_ERROR.value(), "INTERNAL_SERVER_ERROR");
 
         ErrorDetail errorDetail = buildErrorDetail(request, null); // Generic safety errors pass a null validation map
 

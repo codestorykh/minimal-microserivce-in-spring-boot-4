@@ -15,11 +15,44 @@ logging:
 
 hello:
   myname: Hey Yo
+
 management:
   endpoints:
     web:
       exposure:
-        include: "*" # Expose all health and metrics endpoints for easy debugging
+        include: health,info,metrics,prometheus
+  metrics:
+    tags:
+      application: ${spring.application.name}
+    enable:
+      jvm: true
+      process: true
+      system: true
   tracing:
     sampling:
-      probability: 1.0 # sample 100% of requests in local/dev
+      probability: 1.0
+  otlp:
+    metrics:
+      export:
+        enabled: true
+        url: http://localhost:4318/v1/metrics
+        step: 10s
+  logging:
+    export:
+      otlp:
+        enabled: true
+  opentelemetry:
+    # Prometheus OTLP ingest maps service.name→job and service.instance.id→instance.
+    # Required for Grafana JVM Overview (OpenTelemetry) — it filters on instance=~".+".
+    resource-attributes:
+      "[service.name]": ${spring.application.name}
+      "[service.namespace]": codestorykh
+      "[service.instance.id]": ${spring.application.name}:${server.port:8080}
+    tracing:
+      export:
+        otlp:
+          endpoint: http://localhost:4318/v1/traces
+    logging:
+      export:
+        otlp:
+          endpoint: http://localhost:4318/v1/logs

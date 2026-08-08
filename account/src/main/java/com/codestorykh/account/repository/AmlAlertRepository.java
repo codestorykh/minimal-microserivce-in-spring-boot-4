@@ -14,5 +14,7 @@ public interface AmlAlertRepository extends JpaRepository<AmlAlert, Long> {
 
     List<AmlAlert> findByStatus(AmlAlertStatus status);
 
+    List<AmlAlert> findByScreeningId(String screeningId);
+
     long countByAccountIdAndStatus(Long accountId, AmlAlertStatus status);
 }

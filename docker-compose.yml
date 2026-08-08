@@ -78,6 +78,8 @@ services:
       GF_SECURITY_ADMIN_PASSWORD: admin
     volumes:
       - lgtm_data:/data
+      # Include 4xx/CLIENT_ERROR in Error % (invalid requests); stock dashboard only counts 5xx
+      - ./observability/grafana-dashboard-jvm-metrics.json:/otel-lgtm/grafana-dashboard-jvm-metrics.json:ro
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
       interval: 10s

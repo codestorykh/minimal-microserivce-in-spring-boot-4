@@ -2,6 +2,7 @@ package com.codestorykh.account.service.impl;
 
 import com.codestorykh.account.domain.Account;
 import com.codestorykh.account.domain.Customer;
+import com.codestorykh.account.dto.event.AmlAccountLinkedEvent;
 import com.codestorykh.account.dto.request.AccountOnboardingRequest;
 import com.codestorykh.account.dto.request.AmlNewAccountCheckRequest;
 import com.codestorykh.account.dto.response.AccountOnboardingResponse;
@@ -9,9 +10,11 @@ import com.codestorykh.account.dto.response.AmlInspectionResultDto;
 import com.codestorykh.account.mapper.OnboardingMapper;
 import com.codestorykh.account.repository.AccountRepository;
 import com.codestorykh.account.service.AccountOpeningService;
+import com.codestorykh.account.service.AmlAccountLinkPublisher;
 import com.codestorykh.account.service.InternalAmlInspectionService;
 import com.codestorykh.account.service.KycOnboardingService;
 import com.codestorykh.account.service.OnboardingService;
+import com.codestorykh.account.type.AmlDecision;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -29,21 +32,36 @@ public class OnboardingServiceImpl implements OnboardingService {
     private final KycOnboardingService kycOnboardingService;
     private final AccountOpeningService accountOpeningService;
     private final InternalAmlInspectionService amlInspectionService;
+    private final AmlAccountLinkPublisher amlAccountLinkPublisher;
 
     @Transactional
     @Override
     public AccountOnboardingResponse onboardCustomerWithAccount(AccountOnboardingRequest request) {
+        // 1) AML screen BEFORE creating account (no account number yet)
+        AmlInspectionResultDto amlResult = amlInspectionService.inspectNewAccount(
+                AmlNewAccountCheckRequest.from(request)
+        );
+
+        if (amlResult.decision() == AmlDecision.BLOCK) {
+            throw new IllegalArgumentException(
+                    "AML_BLOCKED: " + amlResult.summary() + " (screeningId=" + amlResult.screeningId() + ")"
+            );
+        }
+
+        // 2) Create customer + account
         Customer customer = kycOnboardingService.resolveOrCreateCustomer(request);
         Account account = accountOpeningService.createAccount(customer, request);
 
-        AmlInspectionResultDto amlResult = amlInspectionService.inspectNewAccount(
-                AmlNewAccountCheckRequest.from(account, request)
+        // 3) Publish Kafka event to attach account number to the prior screening
+        amlAccountLinkPublisher.publish(
+                new AmlAccountLinkedEvent(amlResult.screeningId(), account.getAccountNumber())
         );
 
         AccountOnboardingResponse response = onboardingMapper.toAccountResponse(account);
         response.setAmlRiskLevel(amlResult.riskLevel().name());
         response.setAmlDecision(amlResult.decision().name());
         response.setAmlSummary(amlResult.summary());
+        response.setAmlScreeningId(amlResult.screeningId());
         return response;
     }
 

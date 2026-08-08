@@ -1,5 +1,6 @@
 package com.codestorykh.account.dto.request;
 
+import com.codestorykh.account.aml.watchlist.WatchlistScreeningRequest;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -23,5 +24,26 @@ public record AmlTransactionCheckRequest(
 
         @NotBlank(message = "Transaction currency is required")
         @Size(min = 3, max = 3, message = "Currency must be a 3-letter ISO code")
-        String txnCcy
-) {}
+        String txnCcy,
+
+        /** Optional beneficiary / remitter country for geographic watchlist */
+        String counterpartyCountry
+) {
+    public WatchlistScreeningRequest toWatchlistRequest() {
+        return new WatchlistScreeningRequest(
+                firstName,
+                lastName,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                accountNumber,
+                counterpartyCountry
+        );
+    }
+}

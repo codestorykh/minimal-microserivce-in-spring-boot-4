@@ -1,5 +1,6 @@
 package com.codestorykh.account.controller;
 
+import com.codestorykh.api.response.utils.OpenTelemetryUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -14,14 +15,19 @@ public class AccountExceptionHandler {
 
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<Map<String, String>> handleIllegalArgument(IllegalArgumentException ex) {
+        String errorCode = extractErrorCode(ex.getMessage());
+        OpenTelemetryUtils.recordHttpFailure(ex, HttpStatus.BAD_REQUEST.value(), errorCode);
+
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of(
-                "errorCode", extractErrorCode(ex.getMessage()),
+                "errorCode", errorCode,
                 "message", ex.getMessage()
         ));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, Object>> handleValidation(MethodArgumentNotValidException ex) {
+        OpenTelemetryUtils.recordHttpFailure(ex, HttpStatus.BAD_REQUEST.value(), "VALIDATION_ERROR");
+
         String details = ex.getBindingResult().getFieldErrors().stream()
                 .map(err -> err.getField() + ": " + err.getDefaultMessage())
                 .collect(Collectors.joining("; "));

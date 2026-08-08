@@ -31,8 +31,11 @@ public class AmlInspectionController {
             produces = MediaType.APPLICATION_JSON_VALUE
     )
     @Operation(
-            summary = "Screen a new account during/after onboarding",
-            description = "Checks id type/value, first/last name, gender and date of birth against AML rules."
+            summary = "Screen onboarding KYC before account creation",
+            description = "Pre-account KYC/AML screen: identity, demographics, and watchlists "
+                    + "(sanctions name/NID+DOB/country, PEP, city, org, email domain, adverse media). "
+                    + "Identity watchlist requires National ID + date of birth. "
+                    + "No account number required. Returns screeningId for Kafka account-link after create."
     )
     public ResponseEntity<AmlInspectionResultDto> checkOnboardingAccount(
             @Valid @RequestBody AmlNewAccountCheckRequest request

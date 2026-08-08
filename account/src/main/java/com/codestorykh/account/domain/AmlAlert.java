@@ -3,6 +3,7 @@ package com.codestorykh.account.domain;
 import com.codestorykh.account.type.AmlAlertStatus;
 import com.codestorykh.account.type.AmlRuleType;
 import com.codestorykh.account.type.AmlSeverity;
+import com.codestorykh.account.type.IdentityType;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -13,7 +14,8 @@ import java.math.BigDecimal;
     name = "tbl_aml_alert",
     indexes = {
         @Index(name = "idx_aml_alert_status", columnList = "status"),
-        @Index(name = "idx_aml_alert_account", columnList = "account_id")
+        @Index(name = "idx_aml_alert_account", columnList = "account_id"),
+        @Index(name = "idx_aml_alert_screening", columnList = "screening_id")
     }
 )
 @Getter
@@ -27,13 +29,29 @@ public class AmlAlert extends Auditable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    /**
+     * Nullable during pre-onboarding screening; linked later via Kafka after account creation.
+     */
+    @ManyToOne(fetch = FetchType.LAZY, optional = true)
     @JoinColumn(
-        name = "account_id", 
-        nullable = false, 
+        name = "account_id",
+        nullable = true,
         foreignKey = @ForeignKey(name = "fk_aml_account")
     )
     private Account account;
+
+    @Column(name = "screening_id", length = 64)
+    private String screeningId;
+
+    @Column(name = "account_number", length = 34)
+    private String accountNumber;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "identity_type", length = 40)
+    private IdentityType identityType;
+
+    @Column(name = "identity_number", length = 50)
+    private String identityNumber;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "rule_type", nullable = false, length = 50)
