@@ -3,13 +3,14 @@ package com.codestorykh.api.response.exception;
 import com.codestorykh.api.response.dto.ApiResponse;
 import com.codestorykh.api.response.dto.ErrorDetail;
 import com.codestorykh.api.response.utils.OpenTelemetryUtils;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import jakarta.servlet.http.HttpServletRequest;
+
 import java.util.HashMap;
 import java.util.Map;
 

@@ -10,7 +10,6 @@ import com.codestorykh.account.utils.OnboardingUtils;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.security.SecureRandom;
 
 @Service
 public class AccountOpeningService {

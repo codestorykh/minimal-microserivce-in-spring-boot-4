@@ -1,9 +1,9 @@
 package com.codestorykh.account.dto.request;
 
 import com.codestorykh.account.dto.AddressRequest;
+import com.codestorykh.account.type.AccountType;
 import com.codestorykh.account.type.Gender;
 import com.codestorykh.account.type.IdentityType;
-import com.codestorykh.account.type.AccountType;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
