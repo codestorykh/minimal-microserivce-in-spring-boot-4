@@ -13,6 +13,7 @@
 	<modules>
 		<module>config-server</module>
 		<module>account</module>
+		<module>screening</module>
         <module>api-response</module>
     </modules>
 

@@ -1,0 +1,20 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/screening_dev_db
+    username: dev_user
+    password: dev_password_123
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+screening:
+  kafka:
+    enabled: true
+    account-link-topic: screening-account-link-topic
+    group-id: screening-account-link-group
+
+logging:
+  level:
+    com.codestorykh.screening: DEBUG
+    org.hibernate.SQL: DEBUG

@@ -44,15 +44,15 @@ public class AccountOnboardingResponse {
     @Schema(description = "Current account status", example = "ACTIVE")
     private String status;
 
-    @Schema(description = "AML screening id = id_value + DOB(yyyyMMdd)", example = "10090298319950902")
-    private String amlScreeningId;
+    @Schema(description = "Screening id = id_value + DOB(yyyyMMdd)", example = "10090298319950902")
+    private String screeningId;
 
-    @Schema(description = "AML risk level from onboarding inspection", example = "LOW")
-    private String amlRiskLevel;
+    @Schema(description = "Screening risk level from onboarding check", example = "LOW")
+    private String screeningRiskLevel;
 
-    @Schema(description = "AML decision from onboarding inspection", example = "ALLOW")
-    private String amlDecision;
+    @Schema(description = "Screening decision from onboarding check", example = "ALLOW")
+    private String screeningDecision;
 
-    @Schema(description = "AML inspection summary")
-    private String amlSummary;
+    @Schema(description = "Screening summary")
+    private String screeningSummary;
 }

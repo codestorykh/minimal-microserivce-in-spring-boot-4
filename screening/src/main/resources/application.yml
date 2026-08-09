@@ -1,0 +1,28 @@
+server:
+  port: 8082
+spring:
+  jackson:
+    property-naming-strategy: SNAKE_CASE
+  application:
+    name: screening
+  profiles:
+    active: dev
+
+  config:
+    import: "optional:configserver:"
+  cloud:
+    config:
+      uri: http://localhost:8888
+      fail-fast: true
+      retry:
+        max-attempts: 6
+        initial-interval: 1000
+
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+
+screening:
+  kafka:
+    enabled: true
+    account-link-topic: screening-account-link-topic
+    group-id: screening-account-link-group

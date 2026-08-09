@@ -58,7 +58,7 @@ public class Customer extends Auditable {
     @Column(name = "date_of_birth", nullable = false)
     private LocalDate dateOfBirth;
 
-    @Column(nullable = false, unique = true, length = 100)
+    @Column(nullable = true, length = 100)
     private String email;
 
     @Enumerated(EnumType.STRING)
