@@ -1,0 +1,42 @@
+server:
+  port: 8083
+spring:
+  jackson:
+    property-naming-strategy: SNAKE_CASE
+  application:
+    name: payment
+  profiles:
+    active: dev
+
+codestorykh:
+  tracking:
+    channel-header: X-Channel-Id
+    transaction-header: X-Transaction-Id
+    mdc-filter-enabled: true
+    async-decorator-enabled: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  workflow-tracker:
+    enabled: true
+    metric-prefix: banking.payment.step.duration
+    enable-percentiles: true
+  tracing:
+    sampling:
+      probability: 1.0
+  opentelemetry:
+    resource-attributes:
+      "[service.name]": ${spring.application.name}
+      "[service.namespace]": codestorykh
+      "[service.instance.id]": ${spring.application.name}:${server.port:8083}
+    tracing:
+      export:
+        otlp:
+          endpoint: http://localhost:4318/v1/traces
+    logging:
+      export:
+        otlp:
+          endpoint: http://localhost:4318/v1/logs

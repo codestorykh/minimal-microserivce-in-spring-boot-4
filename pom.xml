@@ -11,10 +11,12 @@
 	<packaging>pom</packaging>
 
 	<modules>
+		<module>tracking-logging</module>
+		<module>api-response</module>
 		<module>config-server</module>
 		<module>account</module>
 		<module>screening</module>
-        <module>api-response</module>
+		<module>payment</module>
     </modules>
 
 	<groupId>com.codestorykh</groupId>

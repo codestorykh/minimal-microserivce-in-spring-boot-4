@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Shared Logback fragment for OTLP log export + MDC correlation.
+  Services include:
+
+    <include resource="com/codestorykh/tracking/logging/logback/otel-logging.xml"/>
+-->
+<included>
+    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+
+    <property name="TRACKING_LOG_PATTERN"
+              value="%d{yyyy-MM-dd'T'HH:mm:ss.SSSXXX} %5p [${PID:- }] --- [%t] %-40.40logger{39} : [traceId=%X{traceId:-} spanId=%X{spanId:-} channel=%X{channel:-} channelId=%X{channelId:-} transactionId=%X{transactionId:-} step=%X{step:-}] %m%n%wEx"/>
+
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>${TRACKING_LOG_PATTERN}</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+    </appender>
+
+    <appender name="OTEL" class="io.opentelemetry.instrumentation.logback.appender.v1_0.OpenTelemetryAppender">
+        <captureExperimentalAttributes>true</captureExperimentalAttributes>
+        <captureMdcAttributes>*</captureMdcAttributes>
+    </appender>
+
+    <root level="INFO">
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="OTEL"/>
+    </root>
+</included>

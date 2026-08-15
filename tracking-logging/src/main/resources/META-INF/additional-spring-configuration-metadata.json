@@ -1,0 +1,22 @@
+{
+  "properties": [
+    {
+      "name": "management.workflow-tracker.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Enable WorkflowTrackerFactory auto-configuration.",
+      "defaultValue": true
+    },
+    {
+      "name": "management.workflow-tracker.metric-prefix",
+      "type": "java.lang.String",
+      "description": "Micrometer timer name for workflow steps.",
+      "defaultValue": "workflow.step.duration"
+    },
+    {
+      "name": "management.workflow-tracker.enable-percentiles",
+      "type": "java.lang.Boolean",
+      "description": "Publish p50/p95/p99 percentiles on step timers.",
+      "defaultValue": true
+    }
+  ]
+}
