@@ -17,7 +17,8 @@
 		<module>account</module>
 		<module>screening</module>
 		<module>payment</module>
-    </modules>
+		<module>local-platform</module>
+	</modules>
 
 	<groupId>com.codestorykh</groupId>
 	<artifactId>minimal-microserivce-in-spring-boot-4</artifactId>
